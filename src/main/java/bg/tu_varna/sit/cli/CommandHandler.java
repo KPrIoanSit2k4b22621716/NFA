@@ -2,77 +2,62 @@ package bg.tu_varna.sit.cli;
 
 import bg.tu_varna.sit.model.*;
 import bg.tu_varna.sit.cli.CommandParser.Command;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CommandHandler {
     private final AutomatonManager manager;
+    private final Map<String, CommandExecutor> executors;
+
+    private interface CommandExecutor {
+        void execute(Command cmd);
+    }
 
     public CommandHandler(AutomatonManager manager) {
         this.manager = manager;
+        this.executors = new HashMap<>();
+
+        executors.put("help", cmd -> HelpPrinter.print());
+        executors.put("exit", cmd -> { System.out.println("Излизане от програмата..."); System.exit(0); });
+        executors.put("close", cmd -> manager.closeFile());
+        executors.put("list", cmd -> manager.listAutomata());
+        executors.put("print", cmd -> manager.printAutomaton());
+        executors.put("save", cmd -> manager.saveFile());
+        executors.put("deterministic", cmd -> handleDeterministic());
+        executors.put("empty", cmd -> handleEmpty());
+        executors.put("star", cmd -> handleStar());
+        executors.put("determinize", cmd -> handleDeterminize());
+
+
+        executors.put("open", cmd -> {
+            if (cmd.getArgCount() < 1) {
+                System.out.println("Грешка: open <file>");
+                return;
+            }
+            manager.openFile(cmd.getArg(0));
+        });
+        executors.put("saveas", cmd -> {
+            if (cmd.getArgCount() < 1) {
+                System.out.println("Грешка: saveas <file>");
+                return;
+            }
+            manager.saveAsFile(cmd.getArg(0));
+        });
+        executors.put("recognize", cmd -> handleRecognize(cmd));
+        executors.put("union", cmd -> handleUnion(cmd));
+        executors.put("concat", cmd -> handleConcat(cmd));
+        executors.put("reg", cmd -> handleRegex(cmd));
     }
 
     public void execute(Command cmd) {
-        switch (cmd.getName()) {
-            case "help":
-                HelpPrinter.print();
-                break;
-            case "exit":
-                System.out.println("Излизане от програмата...");
-                System.exit(0);
-                break;
-            case "open":
-                if (cmd.getArgCount() < 1) {
-                    System.out.println("Грешка: open <file>");
-                    return;
-                }
-                manager.openFile(cmd.getArg(0));
-                break;
-            case "close":
-                manager.closeFile();
-                break;
-            case "list":
-                manager.listAutomata();
-                break;
-            case "print":
-                manager.printAutomaton();
-                break;
-            case "save":
-                manager.saveFile();
-                break;
-            case "saveas":
-                if (cmd.getArgCount() < 1) {
-                    System.out.println("Грешка: saveas <file>");
-                    return;
-                }
-                manager.saveAsFile(cmd.getArg(0));
-                break;
-            case "recognize":
-                handleRecognize(cmd);
-                break;
-            case "deterministic":
-                handleDeterministic();
-                break;
-            case "empty":
-                handleEmpty();
-                break;
-            case "union":
-                handleUnion(cmd);
-                break;
-            case "concat":
-                handleConcat(cmd);
-                break;
-            case "star":
-                handleStar();
-                break;
-            case "determinize":
-                handleDeterminize();
-                break;
-            case "reg":
-                handleRegex(cmd);
-                break;
-            default:
-                System.out.println("Неизвестна команда: " + cmd.getName());
+        CommandExecutor executor = executors.get(cmd.getName());
+        if (executor == null) {
+            System.out.println("Неизвестна команда: " + cmd.getName());
+            return;
         }
+        executor.execute(cmd);
     }
+
 
     private void handleRecognize(Command cmd) {
         NFA nfa = manager.getCurrentAutomaton();

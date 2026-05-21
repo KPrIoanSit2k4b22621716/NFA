@@ -52,11 +52,11 @@ public class AutomatonFileManager {
 
         wrapper.transitions = new ArrayList<>();
         for (Transition t : nfa.getTransitions()) {
-            NFAWrapper.TransitionDTO dto = new NFAWrapper.TransitionDTO();
-            dto.from = t.getFrom().getName();
-            dto.to = t.getTo().getName();
-            dto.symbol = t.isEpsilon() ? null : String.valueOf(t.getSymbol());
-            wrapper.transitions.add(dto);
+            NFAWrapper.TransitionInfo info = new NFAWrapper.TransitionInfo();
+            info.from = t.getFrom().getName();
+            info.to = t.getTo().getName();
+            info.symbol = t.isEpsilon() ? null : String.valueOf(t.getSymbol());
+            wrapper.transitions.add(info);
         }
         return wrapper;
     }
@@ -80,12 +80,12 @@ public class AutomatonFileManager {
 
 
         if (wrapper.transitions != null) {
-            for (NFAWrapper.TransitionDTO dto : wrapper.transitions) {
-                State from = stateMap.get(dto.from);
-                State to = stateMap.get(dto.to);
-                Character symbol = (dto.symbol == null || dto.symbol.equals("null") || dto.symbol.isEmpty())
+            for (NFAWrapper.TransitionInfo info : wrapper.transitions) {
+                State from = stateMap.get(info.from);
+                State to = stateMap.get(info.to);
+                Character symbol = (info.symbol == null || info.symbol.equals("null") || info.symbol.isEmpty())
                         ? null
-                        : dto.symbol.charAt(0);
+                        : info.symbol.charAt(0);
                 nfa.addTransition(new Transition(from, to, symbol));
             }
         }

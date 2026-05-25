@@ -1,5 +1,11 @@
 package bg.tu_varna.sit.cli;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public enum CommandType {
     HELP("help", "Displays this help message"),
     EXIT("exit", "Exits the program"),
@@ -19,6 +25,9 @@ public enum CommandType {
     SELECT("select", "Switches current automaton to the specified ID"),
     REG("reg", "Creates an automaton from a regular expression");
 
+    private static final Map<String, CommandType> BY_COMMAND = Arrays.stream(values())
+            .collect(Collectors.toUnmodifiableMap(commandType -> commandType.command, Function.identity()));
+
     private final String command;
     private final String description;
 
@@ -35,12 +44,10 @@ public enum CommandType {
         return description;
     }
 
-    public static CommandType fromString(String text) {
-        for (CommandType cmd : CommandType.values()) {
-            if (cmd.command.equalsIgnoreCase(text)) {
-                return cmd;
-            }
+    public static Optional<CommandType> fromString(String text) {
+        if (text == null) {
+            return Optional.empty();
         }
-        return null;
+        return Optional.ofNullable(BY_COMMAND.get(text.toLowerCase()));
     }
 }

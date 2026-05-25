@@ -76,9 +76,6 @@ public class AutomatonFileManager {
             }
         }
 
-
-
-
         if (wrapper.transitions != null) {
             for (NFAWrapper.TransitionInfo info : wrapper.transitions) {
                 State from = stateMap.get(info.from);

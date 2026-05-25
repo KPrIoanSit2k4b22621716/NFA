@@ -1,10 +1,13 @@
 package bg.tu_varna.sit.cli;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class CLI {
-    private final AutomatonManager manager = new AutomatonManager();
-    private final CommandFactory factory = new CommandFactory(manager);
+    private final CommandFactory factory = CommandFactory.getInstance();
 
     public void start() {
         System.out.println("=== NFA Command Line Interface ===");
@@ -15,29 +18,38 @@ public class CLI {
         while (true) {
             System.out.print("> ");
             String input = scanner.nextLine();
+            List<String> tokens = tokenize(input);
 
-
-            input = input == null ? "" : input.trim();
-            if (input.isEmpty()) {
+            if (tokens.isEmpty()) {
                 continue;
             }
 
-            CommandParser.Command parsedCmd = CommandParser.parse(input);
-
-            if (parsedCmd.getName().isEmpty()) {
+            Optional<CommandType> type = CommandType.fromString(tokens.get(0));
+            if (type.isEmpty()) {
+                System.out.println("Invalid command");
                 continue;
             }
 
-            Command command = factory.createCommand(parsedCmd.getName(), parsedCmd.getArgs());
+            List<String> args = tokens.subList(1, tokens.size());
+            Optional<Command> command = factory.getCommand(type.get());
+            if (command.isEmpty()) {
+                System.out.println("Command is not implemented yet.");
+                continue;
+            }
 
-            if (command != null) {
-                try {
-                    command.execute();
-                } catch (Exception e) {
-                    System.out.println("Unexpected error: " + e.getMessage());
-                    System.out.println("Please check your input and try again.");
-                }
+            try {
+                command.get().execute(args);
+            } catch (Exception e) {
+                System.out.println("Unexpected error: " + e.getMessage());
+                System.out.println("Please check your input and try again.");
             }
         }
+    }
+
+    private List<String> tokenize(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(Arrays.asList(input.trim().split("\\s+")));
     }
 }

@@ -2,8 +2,11 @@ package bg.tu_varna.sit.cli.commands;
 
 import bg.tu_varna.sit.cli.Command;
 import bg.tu_varna.sit.cli.AutomatonManager;
+import bg.tu_varna.sit.cli.CommandArguments;
 import bg.tu_varna.sit.model.NFA;
 import bg.tu_varna.sit.model.NFAOperations;
+
+import java.util.List;
 
 public class StarCommand implements Command {
     private final AutomatonManager manager;
@@ -13,7 +16,10 @@ public class StarCommand implements Command {
     }
 
     @Override
-    public void execute() {
+    public void execute(List<String> args) {
+        if (!CommandArguments.requireNoArgs(args, "star")) {
+            return;
+        }
         NFA current = manager.getCurrentAutomaton();
         if (current == null) {
             System.out.println("Няма отворен автомат.");

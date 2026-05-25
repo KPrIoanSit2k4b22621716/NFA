@@ -2,20 +2,26 @@ package bg.tu_varna.sit.cli.commands;
 
 import bg.tu_varna.sit.cli.Command;
 import bg.tu_varna.sit.cli.AutomatonManager;
+import bg.tu_varna.sit.cli.CommandArguments;
 import bg.tu_varna.sit.model.NFA;
 import bg.tu_varna.sit.model.RegexToNFA;
 
+import java.util.List;
+
 public class RegexCommand implements Command {
     private final AutomatonManager manager;
-    private final String regex;
 
-    public RegexCommand(AutomatonManager manager, String regex) {
+    public RegexCommand(AutomatonManager manager) {
         this.manager = manager;
-        this.regex = regex;
     }
 
     @Override
-    public void execute() {
+    public void execute(List<String> args) {
+        String regex = CommandArguments.requireSingleArgument(args, "reg <regularExpression>");
+        if (regex == null) {
+            return;
+        }
+
         try {
             NFA nfa = RegexToNFA.fromRegex(regex);
             int newId = manager.addAutomaton(nfa);

@@ -9,6 +9,16 @@ public class AutomatonManager {
     private int nextId = 1;
     private NFA currentAutomaton = null;
     private String currentFilePath = null;
+    private static AutomatonManager instance;
+
+    private AutomatonManager() {}
+
+    public static AutomatonManager getInstance() {
+        if (instance == null) {
+            instance = new AutomatonManager();
+        }
+        return instance;
+    }
 
     public NFA getCurrentAutomaton() { return currentAutomaton; }
     public String getCurrentFilePath() { return currentFilePath; }

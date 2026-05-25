@@ -1,5 +1,7 @@
 package bg.tu_varna.sit.cli;
 
+import java.util.List;
+
 public interface Command {
-    void execute();
+    void execute(List<String> args);
 }
